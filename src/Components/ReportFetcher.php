@@ -20,12 +20,12 @@ class ReportFetcher
         FROM
             user_visits
         WHERE user_id IN (
-            SELECT user_id FROM user_visits WHERE `timestamp` < %u
+            SELECT user_id FROM user_visits WHERE `timestamp` >= %u AND `timestamp` < %u
         )
         AND user_id not in (
             SELECT user_id FROM user_visits WHERE `timestamp` >= %u AND `timestamp` < %u
         )
-        AND `timestamp` >= %u AND `timestamp` < %u;
+        AND `timestamp` < %u;
     ';
 
     public function __construct()
@@ -40,11 +40,11 @@ class ReportFetcher
 
         $query = sprintf(
             $this->query,
-            $ts - self::N_DAYS * self::DAY,
+            $ts,
+            $ts + self::DAY,
             $ts - self::N_DAYS * self::DAY,
             $ts,
-            $ts,
-            $ts + self::DAY
+            $ts - self::N_DAYS * self::DAY
         );
 
         $result = $this->db->select($query)->fetchOne();
